@@ -13,6 +13,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Config File.py
+config.py
+
+# vscode
+.vscode*
+
 # C extensions
 *.so
 
