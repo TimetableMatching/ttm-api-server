@@ -19,6 +19,11 @@ class CreateUser(Resource):
             parser.add_argument('organization', type=str)
             args = parser.parse_args()
 
+            ret = {
+                'result_message': '',
+                'status':str(0),
+            }
+
             with db.atomic() as transaction:
                 try:
                     MemberModel.create(
@@ -29,16 +34,14 @@ class CreateUser(Resource):
                     )
                 except Exception as e:
                     transaction.rollback()
-                    return{
-                        'result_message': 'DB:'+str(e),
-                        'status':str(0),
-                    }
+                    ret['result_message']='DB'+str(e)
+                    return ret
 
-            return {
-                'status':str(1),
-                'email': args['email'],
-                'result_message': 'success',
-            }
+            ret['status']=str(1)
+            ret['email']=args['email']
+            ret['result_message']='success'
+
+            return ret
         except Exception as e:
             return {'error': str(e), 'status':str(0)}
 
@@ -119,10 +122,42 @@ class CreateGroup(Resource):
                 'status': str(0)
                 }
 
+class DeleteUser(Resource):
+    def post(def):
+        try:
+            parser = reqparse.RequestParser()
+            parser.add_argument('email', type=str)
+            parser.add_argument('password' type=str)
+            args = parser.parse_args()
+
+            with db.atomic() as transaction:
+                try:
+
+                    ## Fill Code Here
+                    
+                except Exception as e:
+                    transaction.rollback()
+                    return{
+                        'result_message': 'DB:'+str(e),
+                        'status' : str(0)
+                    }
+
+            return {
+                'name': args['email'],
+                'status': str(1),
+                'result_message': 'succeed to delete user '+args['email'],
+            }
+        except Exception as e:
+            return {
+                'error': str(e),
+                'status': str(0)
+                }
+
 
 api.add_resource(CreateUser, '/add_user')
 api.add_resource(Login, '/login')
 api.add_resource(CreateGroup, '/add_group')
+api.add_resource(DeleteUser, '/del_user')
 
 if __name__ == '__main__':
     app.run(
