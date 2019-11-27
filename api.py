@@ -1,3 +1,4 @@
+
 from flask import Flask
 from flask_restful import Resource, Api
 from flask_restful import reqparse
@@ -123,18 +124,30 @@ class CreateGroup(Resource):
                 }
 
 class DeleteUser(Resource):
-    def post(def):
+    def post(self):
         try:
             parser = reqparse.RequestParser()
             parser.add_argument('email', type=str)
-            parser.add_argument('password' type=str)
+            parser.add_argument('password', type=str)
             args = parser.parse_args()
 
             with db.atomic() as transaction:
-                try:
-
-                    ## Fill Code Here
+                try :
+                    #subq = MemberModel\
+                    #.select(MemberModel.account)\
+                    #.where(MemberModel.account == args['email'])
                     
+                    #print(args['email'])
+                    #nrows = MemberModel.delete()\
+                    #        .where(fn.EXISTS(subq)).execute()
+                    
+                    nrows = MemberModel.delete()\
+                            .where(MemberModel.account == args['email'])\
+                            .execute()
+
+                    if nrows == 0:
+                        raise Exception('Can`t Delete Account '+args['email'])
+
                 except Exception as e:
                     transaction.rollback()
                     return{
@@ -143,7 +156,6 @@ class DeleteUser(Resource):
                     }
 
             return {
-                'name': args['email'],
                 'status': str(1),
                 'result_message': 'succeed to delete user '+args['email'],
             }
@@ -162,7 +174,7 @@ api.add_resource(DeleteUser, '/del_user')
 if __name__ == '__main__':
     app.run(
         host="0.0.0.0",
-        port=5000,
+        port=5001,
         debug=True,
         )
     #app.run(debug=True)
