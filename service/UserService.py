@@ -41,7 +41,7 @@ class CreateUser(Resource):
                     return ret
 
             # debug test
-            args['schedule'] = ["12","21","23","32"]
+            #args['schedule'] = ["12","21","23","32"]
             with db.atomic() as transaction:
                 try:
                     query = MemberModel\
