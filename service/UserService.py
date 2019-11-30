@@ -147,8 +147,6 @@ class Login(Resource):
 
                 #Team, notice
                 team_dict_list=[]
-                MA = MemberModel.alias()
-                IA = InvolvedModel.alias()
 
                 query = InvolvedModel\
                     .select(InvolvedModel.g_id)\

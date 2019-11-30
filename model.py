@@ -37,6 +37,7 @@ class NoticeModel(BaseModel):
     g_id = ForeignKeyField(GroupModel, column_name='g_id')
     text = TextField()
     created_at = DateTimeField(default=datetime.datetime.now())
+    author = CharField()
 
     class Meta:
         db_table = 'notice'

@@ -4,7 +4,8 @@ from flask_restful import Resource, Api
 from flask_restful import reqparse
 
 from service.UserService import CreateUser, DeleteUser, Login
-from service.GroupService import CreateGroup
+from service.GroupService import CreateGroup, TeamManage, ReadTeam
+from service.TimeTableService import ChangeTimeTable
 
 from extension import mydb
 from model import *
@@ -16,7 +17,10 @@ db = mydb
 api.add_resource(CreateUser, '/add_user')
 api.add_resource(Login, '/login')
 api.add_resource(CreateGroup, '/add_group')
-api.add_resource(DeleteUser, '/del_user')
+api.add_resource(DeleteUser, '/withdrawl')
+api.add_resource(TeamManage, '/teamManage')
+api.add_resource(ChangeTimeTable, '/update_schelude')
+api.add_resource(ReadTeam, '/read_team')
 
 if __name__ == '__main__':
     app.run(
