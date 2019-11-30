@@ -40,7 +40,7 @@ class NoticeModel(BaseModel):
         db_table = 'notice'
 
 class TableBlankModel(BaseModel):
-    m_id = ForeignKeyField(MemberModel, column_name='id')
+    m_id = ForeignKeyField(MemberModel, column_name='m_id')
     day = IntegerField()
     time = IntegerField(primary_key=True)
 
