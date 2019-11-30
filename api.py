@@ -1,3 +1,4 @@
+
 from flask import Flask
 from flask_restful import Resource, Api
 from flask_restful import reqparse
@@ -20,7 +21,7 @@ api.add_resource(DeleteUser, '/del_user')
 if __name__ == '__main__':
     app.run(
         host="0.0.0.0",
-        port=5000,
+        port=5001,
         debug=True,
         )
     #app.run(debug=True)

@@ -81,10 +81,14 @@ class DeleteUser(Resource):
             args = parser.parse_args()
 
             with db.atomic() as transaction:
-                try:
-                    pass
-                    ## Fill Code Here
-                    
+                try :                    
+                    nrows = MemberModel.delete()\
+                            .where(MemberModel.account == args['email'])\
+                            .execute()
+
+                    if nrows == 0:
+                        raise Exception('Can`t Delete Account '+args['email'])
+
                 except Exception as e:
                     transaction.rollback()
                     return{
@@ -93,7 +97,6 @@ class DeleteUser(Resource):
                     }
 
             return {
-                'name': args['email'],
                 'status': str(1),
                 'result_message': 'succeed to delete user '+args['email'],
             }
@@ -102,6 +105,8 @@ class DeleteUser(Resource):
                 'error': str(e),
                 'status': str(0)
                 }
+
+
 
 class Login(Resource):
     def post(self):
