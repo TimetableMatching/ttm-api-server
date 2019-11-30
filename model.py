@@ -1,6 +1,7 @@
 from peewee import *
 import os
 from extension import mydb
+import datetime
 
 class BaseModel(Model):
     class Meta:
@@ -25,16 +26,17 @@ class GroupModel(BaseModel):
 
 class InvolvedModel(BaseModel):
     is_leader = BooleanField()
-    m_id = ForeignKeyField(MemberModel, column_name='id')
-    g_id = ForeignKeyField(GroupModel, column_name='id')
+    m_id = ForeignKeyField(MemberModel, column_name='m_id')
+    g_id = ForeignKeyField(GroupModel, column_name='g_id')
 
     class Meta:
         db_table = 'involved'
 
 class NoticeModel(BaseModel):
     notice_id = IntegerField(primary_key=True)
-    g_id = ForeignKeyField(GroupModel, column_name='id')
+    g_id = ForeignKeyField(GroupModel, column_name='g_id')
     text = TextField()
+    created_at = DateTimeField(default=datetime.datetime.now())
 
     class Meta:
         db_table = 'notice'

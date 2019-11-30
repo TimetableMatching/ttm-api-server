@@ -40,6 +40,8 @@ class CreateUser(Resource):
                     ret['result_message']='DB'+str(e)
                     return ret
 
+            # debug test
+            args['schedule'] = ["12","21","23","32"]
             with db.atomic() as transaction:
                 try:
                     query = MemberModel\
@@ -106,8 +108,6 @@ class DeleteUser(Resource):
                 'status': str(0)
                 }
 
-
-
 class Login(Resource):
     def post(self):
         try:
@@ -136,13 +136,53 @@ class Login(Resource):
                         'status': str(0)
                     }
             if ok:
-                #Team
-                team_dict = {
-                    "Team ID": "",
-                    "Team Name", "",
-                    "MemberNum", "",    
-                }
 
+                notice_dict_list=[]
+                usr = MemberModel\
+                    .select()\
+                    .where(MemberModel.account == args['email'])
+                
+                for rrow in usr:
+                    mem_id = rrow.id
+
+                #Team, notice
+                team_dict_list=[]
+                MA = MemberModel.alias()
+                IA = InvolvedModel.alias()
+
+                query = InvolvedModel\
+                    .select(InvolvedModel.g_id)\
+                    .join(MemberModel)\
+                    .where(MemberModel.id == mem_id)\
+                    .distinct()
+
+                for row in query:
+                    info_query = GroupModel\
+                    .select(GroupModel.id, GroupModel.name)\
+                    .where(GroupModel.id == row.g_id)
+
+                    for qqq in info_query:
+                        ##qqq.id = team id
+                        ##qqq.name = team name
+                        num_query = InvolvedModel.select(fn.COUNT(InvolvedModel.m_id)).where(InvolvedModel.g_id==row.g_id)
+                        team_dict_list.append(
+                            {
+                            'Team ID': qqq.id,
+                            'Team Name':qqq.name,
+                            'MemberNum': num_query.scalar()
+                            }
+                        )
+
+                        notice_query = NoticeModel.select().where(qqq.id == NoticeModel.g_id)
+
+                        for notice_row in notice_query:
+                            notice_dict_list.append(
+                                {
+                                    "Team_id" : str(qqq.id),
+                                    "Date": str(notice_row.created_at),
+                                    "Text": notice_row.text,
+                                }
+                            )
                 #User Info
                 user_dict ={
                     "Email": "",
@@ -151,16 +191,37 @@ class Login(Resource):
                     "Schedule": [],
                 }
 
-                #Notice Dict
-                notice_dict = {
-                    "Team_id" : "",
-                    "Date":"",
-                    "Text":"",
-                    "author":"",
+                usr = MemberModel\
+                    .select()\
+                    .where(MemberModel.account == args['email'])
+
+                for row in usr:
+                    usr_id = row.id
+                    usr_org= row.organization
+                    usr_name=row.name
+
+                schedule = TableBlankModel\
+                    .select()\
+                    .where(TableBlankModel.m_id == usr_id)
+                
+                user_dict['Email']=args['email']
+                user_dict['Organization']=usr_org
+                user_dict['Name'] = usr_name
+
+                for row in schedule:
+                    user_dict['Schedule'].append(str(row.day)+str(row.time))
+                ret_team_dl = list(team_dict_list)
+                ret_user_d  = dict(user_dict)
+                ret_notice_dl=list(notice_dict_list)
+
+                team_dict_list.clear()
+                user_dict.clear()
+                notice_dict_list.clear()
+                return{
+                    "Team":ret_team_dl,
+                    "User":ret_user_d,
+                    "Notice":ret_notice_dl,
                 }
-
-
-
 
 
             else:
