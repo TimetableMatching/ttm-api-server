@@ -70,8 +70,8 @@ class TeamManage(Resource):
                             num_query = InvolvedModel.select(fn.COUNT(InvolvedModel.m_id)).where(InvolvedModel.g_id==row.g_id)
                             team_dict_list.append(
                                 {
-                                'Team ID': qqq.id,
-                                'Team Name':qqq.name,
+                                'Team_ID': qqq.id,
+                                'Team_Name':qqq.name,
                                 'MemberNum': str(num_query.scalar())
                                 }
                             )
@@ -99,8 +99,8 @@ class ReadTeam(Resource):
             }
         try:
             result_dict={
-                "Team ID":"",
-                "Team Name":"",
+                "Team_ID":"",
+                "Team_Name":"",
                 "MemberNum":"",
                 "Member":[],
                 "notice":[],
@@ -124,8 +124,8 @@ class ReadTeam(Resource):
                         .join(MemberModel)\
                         .where(InvolvedModel.g_id == args['team_id'])\
                         .dicts()
-                    result_dict['Team ID'] = args['team_id']
-                    result_dict['Team Name'] = group_name
+                    result_dict['Team_ID'] = args['team_id']
+                    result_dict['Team_Name'] = group_name
                     mem_num=0
 
 

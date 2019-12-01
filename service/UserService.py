@@ -165,8 +165,8 @@ class Login(Resource):
                         num_query = InvolvedModel.select(fn.COUNT(InvolvedModel.m_id)).where(InvolvedModel.g_id==row.g_id)
                         team_dict_list.append(
                             {
-                            'Team ID': qqq.id,
-                            'Team Name':qqq.name,
+                            'Team_ID': qqq.id,
+                            'Team_Name':qqq.name,
                             'MemberNum': num_query.scalar()
                             }
                         )
@@ -219,6 +219,7 @@ class Login(Resource):
                     "Team":ret_team_dl,
                     "User":ret_user_d,
                     "Notice":ret_notice_dl,
+                    "status":str(1),
                 }
 
 
