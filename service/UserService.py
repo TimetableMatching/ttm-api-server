@@ -7,6 +7,32 @@ import hashlib
 
 db = mydb
 
+class ReadUser(Resource):
+    def post(self):
+        try:
+            parser = reqparse.RequestParser()
+            parser.add_argument('email', type=str)
+            args = parser.parse_args()
+
+            query = MemberModel.select()\
+            .where(MemberModel.account == args['email'])\
+            .dicts()
+
+            for row in query:
+                return{
+                    "Organization":str(row['organization']),
+                    "Name":str(row['name']),
+                }
+
+
+        except Exception as e:
+            return {
+                "error":str(e),
+                "status":str(0),
+            }
+
+            
+
 class CreateUser(Resource):
     def post(self):
         try:
@@ -17,7 +43,7 @@ class CreateUser(Resource):
             parser.add_argument('organization', type=str)
             parser.add_argument('schedule', action='append')
             args = parser.parse_args()
-            
+            #print(args)
             ret = {
                 'result_message': '',
                 'status':str(0),
@@ -72,7 +98,6 @@ class CreateUser(Resource):
 
         except Exception as e:
             return {'error': str(e), 'status':str(0)}
-
 
 class DeleteUser(Resource):
     def post(self):
@@ -235,3 +260,29 @@ class Login(Resource):
                         'email': args['email'],
                         'status': str(0)
                     }
+
+class MemberSearch(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('email', type=str)
+        args = parser.parse_args()
+
+        with db.atomic() as transaction:
+            try:
+                num_query = MemberModel\
+                .select(fn.COUNT(MemberModel.id))\
+                .where(MemberModel.account == args['email'])
+
+                
+                return {
+                    "status":str(1),
+                    "is_exist":str(num_query.scalar()),
+                }
+            except Exception as e:
+                return {
+                    "status":str(0),
+                    "error":str(e),
+                }
+    
+
+                

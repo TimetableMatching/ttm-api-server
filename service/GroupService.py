@@ -5,17 +5,76 @@ from model import *
 
 db = mydb
 
-class CreateGroup(Resource):
+class GetMaxTeamId(Resource):
+    def post(self):
+        try:
+            query=GroupModel.select(fn.MAX(GroupModel.id))
+            return {"status":str(1),"team_id":str(1+query.scalar())}
+        except Exception as e:
+            return {"status":str(0),"error":str(e)}
+
+class DeleteGroup(Resource):
     def post(self):
         try:
             parser = reqparse.RequestParser()
-            parser.add_argument('name', type=str)
+            parser.add_argument('team_id', type=str)
+            parser.add_argument('leader_email', type=str)
             args = parser.parse_args()
 
             with db.atomic() as transaction:
                 try:
+                    query = InvolvedModel\
+                        .select(InvolvedModel.is_leader)\
+                        .join(MemberModel)\
+                        .where((MemberModel.account == args['leader_email']) & (InvolvedModel.g_id == args['team_id']))\
+                    
+                    judge=0
+                    for row in query.dicts():
+                        judge = row['is_leader']
+                        print(judge)
+                                    
+                    if judge:
+                        try:
+                            noti = NoticeModel.get(NoticeModel.g_id == args['team_id'])
+                            noti.delete_instance()
+                        except Exception as p:
+                            print(p)
+
+                            InvolvedModel.delete()\
+                                .where(InvolvedModel.g_id == args['team_id'])\
+                                .execute()
+                            
+                        GroupModel.delete().where(GroupModel.id == args['team_id']).execute()
+                        #gr = GroupModel.get(GroupModel.id == args['team_id'])
+                        #gr.delete_instance()
+
+                        return {'status':str(1)}
+
+                    else:
+                        raise Exception("no leader")
+
+                except Exception as e:
+                    transaction.rollback()
+                    return {'status':str(0),"error":str(e)}
+
+
+        except Exception as e:
+            return {"status":str(0),"error":str(e)}
+
+class CreateGroup(Resource):
+    def post(self):
+        try:
+            parser = reqparse.RequestParser()
+            parser.add_argument('team_id', type=str)
+            parser.add_argument('team_name', type=str)
+            parser.add_argument('leader_email',type=str)
+            parser.add_argument('member_list', action='append')
+
+            args = parser.parse_args()
+            with db.atomic() as transaction:
+                try:
                     GroupModel.create(
-                        name = str(args['name']),
+                        name = str(args['team_name']),
                     )
                 except Exception as e:
                     transaction.rollback()
@@ -24,10 +83,31 @@ class CreateGroup(Resource):
                         'status' : str(0)
                     }
 
+                try:
+                    query=GroupModel.select(fn.MAX(GroupModel.id))
+                    gr_id = query.scalar()
+                
+                    m_id_list=[]
+                    for mails in args['member_list']:
+                        isleader =0
+                        if mails == args['leader_email']:
+                            isleader=1
+
+                        q = MemberModel\
+                            .select(MemberModel.id)\
+                            .where(MemberModel.account == mails)\
+                            .dicts()
+                        for row in q:
+                            InvolvedModel\
+                                .create(is_leader=isleader, g_id=gr_id, m_id=row['id'])
+                except Exception as e:
+                    return{
+                        'result_message': 'DB:'+str(e),
+                        'status' : str(0)
+                    }
+
             return {
-                'name': args['name'],
-                'status': str(1),
-                'result_message': 'success',
+                'status':str(1)
             }
         except Exception as e:
             return {
@@ -78,6 +158,7 @@ class TeamManage(Resource):
 
                     return {
                         "Team":team_dict_list,
+                        'status':str(1),
                     }
 
                 except Exception as e:
@@ -124,6 +205,7 @@ class ReadTeam(Resource):
                         .join(MemberModel)\
                         .where(InvolvedModel.g_id == args['team_id'])\
                         .dicts()
+
                     result_dict['Team_ID'] = args['team_id']
                     result_dict['Team_Name'] = group_name
                     mem_num=0
@@ -176,4 +258,4 @@ class ReadTeam(Resource):
 
         except Exception as e:
             ERROR_DICT['error']=str(e)
-            return ERROR_DICT   
+            return ERROR_DICT
