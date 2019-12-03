@@ -21,11 +21,12 @@ api.add_resource(DeleteUser, '/withdrawl')
 api.add_resource(TeamManage, '/teamManage')
 api.add_resource(ChangeTimeTable, '/update_schelude')
 api.add_resource(ReadTeam, '/read_team')
+api.add_resoruce(ChangeTimeTable, '/update_schelude')
 
 if __name__ == '__main__':
     app.run(
         host="0.0.0.0",
-        port=5000,
+        port=5001,
         debug=True,
         )
     #app.run(debug=True)
