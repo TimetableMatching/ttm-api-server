@@ -1,0 +1,46 @@
+from flask_restful import Resource, Api
+from flask_restful import reqparse
+from extension import mydb
+from model import *
+
+db = mydb
+
+class ChangeTimeTable(Resource):
+    def post(self):
+        ERROR_DICT = {
+                "error":"",
+                "status":str(0)
+            }
+        try:
+            parser = reqparse.RequestParser()
+            parser.add_argument('email', type=str)
+            parser.add_argument('schedule', action='append')
+            args = parser.parse_args()
+
+            with db.atomic() as transaction:
+                try:
+		    subq = MemberModel\
+			.select(MemberModel.id)\
+			.where(MemberModel.email == args['email']).execute()
+
+		    nrows = TableBlankModel\
+			.delete(TableBlankModel."(day)(time)")\
+			.where(fn.EXISTS(subq)).execute()
+
+		    res = TableBlankModel\
+		 	.insert_from(nrows, TableBlankModel."(day)(time)")
+			.where(args['schedule']).execute()
+
+	#	    if subq == 0 :
+	#		raise Exception('Cannot insert schedule '+args['schedule'])
+
+                    # code here
+                    raise NotImplemented
+
+                except Exception as e:
+                    ERROR_DICT['error']=str(e)
+                    return ERROR_DICT
+
+        except Exception as e:
+            ERROR_DICT['error']=str(e)
+            return ERROR_DICT

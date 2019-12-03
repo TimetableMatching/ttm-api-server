@@ -25,6 +25,7 @@ api.add_resource(DeleteUser, '/withdrawl')
 api.add_resource(TeamManage, '/team_manage')
 api.add_resource(ChangeTimeTable, '/update_schelude')
 api.add_resource(ReadTeam, '/read_team')
+api.add_resoruce(ChangeTimeTable, '/update_schelude')
 api.add_resource(GetMaxTeamId, '/get_max_team_id')
 
 api.add_resource(MemberSearch, '/member_search')
