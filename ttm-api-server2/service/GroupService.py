@@ -40,9 +40,9 @@ class DeleteGroup(Resource):
                         except Exception as p:
                             print(p)
 
-                        InvolvedModel.delete()\
-                            .where(InvolvedModel.g_id == args['team_id'])\
-                            .execute()
+                            InvolvedModel.delete()\
+                                .where(InvolvedModel.g_id == args['team_id'])\
+                                .execute()
                             
                         GroupModel.delete().where(GroupModel.id == args['team_id']).execute()
                         #gr = GroupModel.get(GroupModel.id == args['team_id'])
