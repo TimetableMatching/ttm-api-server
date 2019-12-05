@@ -31,8 +31,6 @@ class ReadUser(Resource):
                 "status":str(0),
             }
 
-            
-
 class CreateUser(Resource):
     def post(self):
         try:
@@ -104,11 +102,24 @@ class DeleteUser(Resource):
         try:
             parser = reqparse.RequestParser()
             parser.add_argument('email', type=str)
-            parser.add_argument('password', type=str)
             args = parser.parse_args()
 
             with db.atomic() as transaction:
-                try :                    
+                member_id = 0
+                try :
+                    mem_query = MemberModel.select(MemberModel.id).where(MemberModel.account==args['email']).dicts()
+                    for _ in mem_query:
+                        member_id = _['id']
+
+                    inv_query = InvolvedModel\
+                        .select(InvolvedModel.g_id)\
+                        .where((InvolvedModel.m_id == member_id) & (InvolvedModel.is_leader == 1)).dicts()
+
+                    for _ in inv_query:
+                        GroupModel.delete().where(GroupModel.id == _['g_id']).execute()
+                        NoticeModel.delete().where(NoticeModel.g_id == _['g_id']).execute()
+
+
                     nrows = MemberModel.delete()\
                             .where(MemberModel.account == args['email'])\
                             .execute()
