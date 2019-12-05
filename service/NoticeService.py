@@ -7,6 +7,10 @@ db = mydb
 
 class WriteNotice(Resource):
     def post(self):
+        ERROR_DICT = {
+                "error":"",
+                "status":str(0)
+            }
         try:
             parser = reqparse.RequestParser()
             parser.add_argument('notice', type=str)
@@ -24,10 +28,8 @@ class WriteNotice(Resource):
                             created_at =datetime.datetime.now(),
                         )
                 except Exception as e:
-                    return {
-                        'status':str(0),
-                        'error':str(e),
-                    }
+                    ERROR_DICT['error'] =str(e)
+                    return ERROR_DICT
 
                 return {
                     'status':str(1),
@@ -35,7 +37,54 @@ class WriteNotice(Resource):
                 
 
         except Exception as e:
-            return {
-                'status':str(0),
-                'error':str(e),
+            ERROR_DICT['error'] =str(e)
+            return ERROR_DICT
+
+class DeleteNotice(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('notice_id', type=str)
+        args = parser.parse_args()
+        ERROR_DICT = {
+                "error":"",
+                "status":str(0)
             }
+        try:
+            with db.atomic() as transaction:
+                try:
+                    NoticeModel.delete().where(NoticeModel.notice_id == args['notice_id']).execute()
+                    return {'status':str(1)}
+                except Exception as e:
+                    transaction.rollback()
+                    ERROR_DICT['error'] = str(e)
+                    return ERROR_DICT
+        except Exception as e:
+            ERROR_DICT['error'] =str(e)
+            return ERROR_DICT
+
+class UpdateNotice(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('notice_id', type=str)
+        parser.add_argument('text', type=str)
+        args = parser.parse_args()
+
+        ERROR_DICT = {
+                "error":"",
+                "status":str(0)
+            }
+        try:
+            with db.atomic() as transaction:
+                try:
+                    NoticeModel.update(text=args['text']).where(NoticeModel.notice_id == args['notice_id']).execute()
+                    return {'status':str(1)}
+                except Exception as e:
+                    transaction.rollback()
+                    return {
+                        'status':str(0),
+                        'error':str(e),
+                    }
+        
+        except Exception as e:
+            ERROR_DICT['error'] =str(e)
+            return ERROR_DICT

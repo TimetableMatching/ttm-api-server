@@ -239,9 +239,10 @@ class ReadTeam(Resource):
                         .dicts()
                     
                     for notice_row in notice_query:
-                        print(notice_row)
+                        #print(notice_row)
                         result_dict['notice'].append(
                             {
+                                "notice_id":str(notice_row['notice_id']),
                                 "Team_id" : str(args['team_id']),
                                 "Date" : str(notice_row['created_at']),
                                 "Text" : str(notice_row['text']),

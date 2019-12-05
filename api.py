@@ -39,6 +39,9 @@ api.add_resource(MemberSearch, '/member_search')
 api.add_resource(ReadUser, '/read_member')
  
 api.add_resource(WriteNotice, '/add_notice')
+api.add_resource(DeleteNotice, '/delete_notice')
+api.add_resource(UpdateNotice, '/update_notice')
+
 
 if __name__ == '__main__':
     app.run(
